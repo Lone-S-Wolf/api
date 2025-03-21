@@ -56,3 +56,27 @@ class Item(ItemBase):
 
     class Config:
         from_attributes = True 
+
+# Question schemas
+class QuestionBase(BaseModel):
+    title: str
+    content: str
+    answer: Optional[str] = None
+    is_active: bool = True
+
+class QuestionCreate(QuestionBase):
+    pass
+
+class QuestionUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    answer: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class Question(QuestionBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True

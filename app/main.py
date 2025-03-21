@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import items, auth, admin, manager, user, viewer
+from app.routers import items, auth, admin, manager, user, viewer, questions
 from app.models import models
 from app.database.database import engine
 import sqlalchemy.exc
@@ -31,6 +31,7 @@ app.include_router(admin.router)
 app.include_router(manager.router)
 app.include_router(user.router)
 app.include_router(viewer.router)
+app.include_router(questions.router)
 
 @app.get("/")
 def read_root():
