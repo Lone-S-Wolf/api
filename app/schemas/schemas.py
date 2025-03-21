@@ -1,6 +1,14 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
+from enum import Enum
+
+# Role enum for schema validation
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    MANAGER = "manager"
+    USER = "user"
+    VIEWER = "viewer"
 
 # User schemas
 class UserBase(BaseModel):
@@ -9,9 +17,11 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    role: Optional[UserRole] = UserRole.USER
 
 class UserResponse(UserBase):
     id: int
+    role: UserRole
     is_active: bool
     created_at: datetime
 

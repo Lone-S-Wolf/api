@@ -1,6 +1,6 @@
-# FastAPI CRUD Application with Authentication
+# FastAPI CRUD Application with Advanced RBAC
 
-A simple CRUD application built with FastAPI, SQLite/PostgreSQL, and JWT authentication.
+A simple CRUD application built with FastAPI, SQLite/PostgreSQL, JWT authentication, and Advanced Role-Based Access Control (RBAC).
 
 ## Setup
 
@@ -29,7 +29,37 @@ uvicorn app.main:app --reload
 
 5. Access the API documentation at: http://localhost:8000/docs
 
-## Authentication
+## Authentication and Authorization
+
+### User Roles
+
+The application supports four user roles with increasing levels of permissions:
+
+1. **Viewer**: Read-only access to items
+   - Can view and search items
+   - Cannot create, update, or delete items
+
+2. **User**: Basic item management
+   - Can view, search, create, and update items
+   - Can toggle item completion status
+   - Cannot delete items
+
+3. **Manager**: Enhanced management capabilities
+   - All User permissions
+   - Can view item statistics
+   - Can create items in bulk
+   - Can view regular and viewer users
+   - Cannot manage other managers or admins
+
+4. **Admin**: Full system access
+   - All Manager permissions
+   - Can manage all users (view, update roles, enable/disable)
+   - Can delete items
+   - Can perform all administrative functions
+
+The first registered user is automatically assigned the admin role.
+
+### Authentication
 
 The API uses JWT token-based authentication:
 
@@ -41,7 +71,8 @@ curl -X 'POST' \
   -d '{
   "email": "user@example.com",
   "username": "testuser",
-  "password": "password123"
+  "password": "password123",
+  "role": "user"
 }'
 ```
 
@@ -67,13 +98,35 @@ curl -X 'GET' \
 - `POST /auth/token`: Login and get access token
 - `GET /auth/users/me`: Get current user information
 
-### Items (requires authentication)
-- `GET /`: Welcome message
+### Items (General Endpoints)
 - `GET /items`: List all items
 - `POST /items`: Create a new item
 - `GET /items/{item_id}`: Get a specific item
 - `PUT /items/{item_id}`: Update an item
-- `DELETE /items/{item_id}`: Delete an item
+- `DELETE /items/{item_id}`: Delete an item (Admin only)
+
+### Viewer Endpoints (All Roles)
+- `GET /viewer/items`: View items with optional filtering
+- `GET /viewer/items/{item_id}`: View a specific item
+- `GET /viewer/items/search`: Search items by title or description
+
+### User Endpoints (User, Manager, Admin)
+- `POST /user/items`: Create a new item
+- `PUT /user/items/{item_id}`: Update an item
+- `PUT /user/items/{item_id}/toggle-completion`: Toggle item completion status
+
+### Manager Endpoints (Manager, Admin)
+- `GET /manager/users`: List regular and viewer users
+- `GET /manager/items/stats`: Get statistics about items
+- `POST /manager/items/bulk`: Create multiple items at once
+
+### Admin Endpoints (Admin only)
+- `GET /admin/users`: List all users
+- `GET /admin/users/by-role/{role}`: List users by role
+- `PUT /admin/users/{user_id}/toggle-active`: Enable/disable a user
+- `PUT /admin/users/{user_id}/set-role`: Change a user's role
+- `DELETE /admin/items/all`: Delete all items
+- `DELETE /admin/items/{item_id}`: Delete a specific item
 
 ## Example API Usage
 

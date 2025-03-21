@@ -8,7 +8,7 @@ from app.auth.utils import (
     ACCESS_TOKEN_EXPIRE_MINUTES, get_current_active_user
 )
 from app.database.database import get_db
-from app.models.models import User
+from app.models.models import User, UserRole
 from app.schemas.schemas import Token, UserCreate, UserResponse
 
 router = APIRouter(
@@ -51,10 +51,21 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     
     # Create new user
     hashed_password = get_password_hash(user.password)
+    
+    # Get role from request, default to regular user
+    role = user.role if user.role else UserRole.USER
+    
+    # For security, check if this is the first user in the system
+    # If yes, make them an admin automatically
+    user_count = db.query(User).count()
+    if user_count == 0:
+        role = UserRole.ADMIN
+    
     db_user = User(
         email=user.email,
         username=user.username,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        role=role
     )
     db.add(db_user)
     db.commit()
