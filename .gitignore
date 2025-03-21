@@ -1,0 +1,70 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env
+*.venv
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Python cache
+.pytest_cache/
+
+# Coverage reports
+.coverage
+htmlcov/
+.coverage.*
+
+# Build artifacts
+build/
+dist/
+*.egg
+*.manifest
+*.spec
+
+# Docker
+*.pid
+*.sock
+tmp/
+
+# FastAPI specific
+instance/
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Migrations (if using Alembic)
+migrations/versions/*.pyc
+migrations/versions/*.pyo
+migrations/versions/__pycache__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Gunicorn
+gunicorn_error.log
