@@ -7,12 +7,12 @@ from app.models.models import User, UserRole, Item as ModelItem
 from app.schemas.schemas import Item
 from app.auth.rbac import get_user_with_roles
 
-# All authenticated users can access viewer endpoints
-all_users = get_user_with_roles([UserRole.VIEWER, UserRole.USER, UserRole.MANAGER, UserRole.ADMIN])
+# All authenticated users can access student endpoints
+all_users = get_user_with_roles([UserRole.STUDENT, UserRole.FACULTY, UserRole.INSTITUTION, UserRole.ADMIN])
 
 router = APIRouter(
-    prefix="/viewer",
-    tags=["viewer"],
+    prefix="/student",
+    tags=["student"],
     dependencies=[Depends(all_users)]
 )
 
@@ -56,4 +56,4 @@ def search_items(
     items = db.query(ModelItem).filter(
         (ModelItem.title.contains(query)) | (ModelItem.description.contains(query))
     ).all()
-    return items 
+    return items

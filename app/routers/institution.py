@@ -7,34 +7,34 @@ from app.models.models import User, UserRole, Item as ModelItem
 from app.schemas.schemas import UserResponse, Item, ItemCreate
 from app.auth.rbac import get_user_with_roles
 
-# Only managers and admins can access these endpoints
-manager_users = get_user_with_roles([UserRole.MANAGER, UserRole.ADMIN])
+# Only institutions and admins can access these endpoints
+institution_users = get_user_with_roles([UserRole.INSTITUTION, UserRole.ADMIN])
 
 router = APIRouter(
-    prefix="/manager",
-    tags=["manager"],
-    dependencies=[Depends(manager_users)]
+    prefix="/institution",
+    tags=["institution"],
+    dependencies=[Depends(institution_users)]
 )
 
 @router.get("/users", response_model=List[UserResponse])
-def list_regular_users(
+def list_faculty_students(
     skip: int = 0, 
     limit: int = 100, 
     db: Session = Depends(get_db),
-    current_user: User = Depends(manager_users)
+    current_user: User = Depends(institution_users)
 ):
-    """List regular and viewer users (no managers or admins) - Manager only"""
+    """List faculty and student users (no institutions or admins) - Institution only"""
     users = db.query(User).filter(
-        User.role.in_([UserRole.USER, UserRole.VIEWER])
+        User.role.in_([UserRole.FACULTY, UserRole.STUDENT])
     ).offset(skip).limit(limit).all()
     return users
 
 @router.get("/items/stats", response_model=dict)
 def get_items_stats(
     db: Session = Depends(get_db),
-    current_user: User = Depends(manager_users)
+    current_user: User = Depends(institution_users)
 ):
-    """Get statistics about items - Manager only"""
+    """Get statistics about items - Institution only"""
     total_items = db.query(ModelItem).count()
     completed_items = db.query(ModelItem).filter(ModelItem.is_completed == True).count()
     incomplete_items = total_items - completed_items
@@ -50,9 +50,9 @@ def get_items_stats(
 def create_bulk_items(
     items: List[ItemCreate],
     db: Session = Depends(get_db),
-    current_user: User = Depends(manager_users)
+    current_user: User = Depends(institution_users)
 ):
-    """Create multiple items at once - Manager only"""
+    """Create multiple items at once - Institution only"""
     db_items = []
     for item in items:
         db_item = ModelItem(**item.model_dump())
@@ -63,4 +63,4 @@ def create_bulk_items(
     for item in db_items:
         db.refresh(item)
     
-    return db_items 
+    return db_items

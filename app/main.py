@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import items, auth, admin, manager, user, viewer, questions
+from app.routers import items, auth, admin, institution, faculty, student
 from app.models import models
 from app.database.database import engine
 import sqlalchemy.exc
@@ -28,11 +28,10 @@ except sqlalchemy.exc.OperationalError:
 app.include_router(auth.router)
 app.include_router(items.router)
 app.include_router(admin.router)
-app.include_router(manager.router)
-app.include_router(user.router)
-app.include_router(viewer.router)
-app.include_router(questions.router)
+app.include_router(institution.router)
+app.include_router(faculty.router)
+app.include_router(student.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to FastAPI CRUD API with Advanced Role-Based Access Control"} 
+    return {"message": "Welcome to FastAPI CRUD API with Advanced Role-Based Access Control"}

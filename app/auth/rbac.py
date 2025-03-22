@@ -27,4 +27,4 @@ def get_user_with_roles(roles: list[UserRole]):
         check_user_role(roles, current_user)
         return current_user
         
-    return _get_user_with_roles 
+    return _get_user_with_roles

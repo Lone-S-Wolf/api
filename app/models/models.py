@@ -6,9 +6,9 @@ from app.database.database import Base
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
-    MANAGER = "manager"
-    USER = "user"
-    VIEWER = "viewer"
+    INSTITUTION = "institution"
+    FACULTY = "faculty"
+    STUDENT = "student"
 
 class User(Base):
     __tablename__ = "users"
@@ -17,7 +17,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    role = Column(String, default=UserRole.USER)
+    role = Column(String, default=UserRole.FACULTY)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -28,16 +28,5 @@ class Item(Base):
     title = Column(String, index=True)
     description = Column(String)
     is_completed = Column(Boolean, default=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
-class Question(Base):
-    __tablename__ = "questions"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    content = Column(String)
-    answer = Column(String, nullable=True)
-    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

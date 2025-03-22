@@ -8,8 +8,8 @@ from app.schemas.schemas import Item, ItemCreate, ItemUpdate
 from app.auth.utils import get_current_active_user
 from app.auth.rbac import get_admin_user, get_user_with_roles
 
-# All users (both regular users and admins) can access these endpoints
-all_users = get_user_with_roles([UserRole.USER, UserRole.ADMIN])
+# All users (faculty and admins) can access these endpoints
+all_users = get_user_with_roles([UserRole.FACULTY, UserRole.ADMIN])
 
 router = APIRouter(
     prefix="/items",
@@ -82,4 +82,4 @@ def delete_item(
     
     db.delete(db_item)
     db.commit()
-    return None 
+    return None

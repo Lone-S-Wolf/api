@@ -6,9 +6,9 @@ from enum import Enum
 # Role enum for schema validation
 class UserRole(str, Enum):
     ADMIN = "admin"
-    MANAGER = "manager"
-    USER = "user"
-    VIEWER = "viewer"
+    INSTITUTION = "institution"
+    FACULTY = "faculty"
+    STUDENT = "student"
 
 # User schemas
 class UserBase(BaseModel):
@@ -17,7 +17,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    role: Optional[UserRole] = UserRole.USER
+    role: Optional[UserRole] = UserRole.FACULTY
 
 class UserResponse(UserBase):
     id: int
@@ -50,30 +50,6 @@ class ItemUpdate(BaseModel):
     is_completed: Optional[bool] = None
 
 class Item(ItemBase):
-    id: int
-    created_at: datetime
-    updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True 
-
-# Question schemas
-class QuestionBase(BaseModel):
-    title: str
-    content: str
-    answer: Optional[str] = None
-    is_active: bool = True
-
-class QuestionCreate(QuestionBase):
-    pass
-
-class QuestionUpdate(BaseModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    answer: Optional[str] = None
-    is_active: Optional[bool] = None
-
-class Question(QuestionBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
