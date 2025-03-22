@@ -2,18 +2,15 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List
 from datetime import datetime
 
 from app.database.database import get_db
-from app.models.models import User, Test, Question, Option, TestSession, UserResponse, UserRole, QuestionType
+from app.models.models import User, Test, UserRole
 from app.schemas.schemas import (
-    TestCreate, TestUpdate, TestResponse, 
-    QuestionCreate, QuestionResponse, QuestionUpdate,
-    TestSessionCreate, TestSessionResponse, TestSessionDetailResponse,
-    TestSubmission, TestResultsSummary
+    TestCreate, TestUpdate, TestResponse
 )
-from app.auth.rbac import get_user_with_roles, get_admin_user
+from app.auth.rbac import get_user_with_roles
 
 router = APIRouter(
     prefix="/tests",
@@ -65,10 +62,9 @@ def get_tests(
     else:
         tests = db.query(Test).offset(skip).limit(limit).all()
     
-    # Add question count to each test
+    # Add question count to each test using the relationship
     for test in tests:
-        question_count = db.query(Question).filter(Question.test_id == test.id).count()
-        setattr(test, 'question_count', question_count)
+        setattr(test, 'question_count', len(test.questions))
     
     return tests
 
@@ -90,9 +86,8 @@ def get_test(
     if current_user.role == UserRole.FACULTY and not test.is_active and test.created_by != current_user.id:
         raise HTTPException(status_code=403, detail="You don't have permission to view this test")
     
-    # Add question count
-    question_count = db.query(Question).filter(Question.test_id == test.id).count()
-    setattr(test, 'question_count', question_count)
+    # Add question count using the relationship
+    setattr(test, 'question_count', len(test.questions))
     
     return test
 
@@ -119,13 +114,12 @@ def update_test(
     db.commit()
     db.refresh(test)
     
-    # Add question count
-    question_count = db.query(Question).filter(Question.test_id == test.id).count()
-    setattr(test, 'question_count', question_count)
+    # Add question count using the relationship
+    setattr(test, 'question_count', len(test.questions))
     
     return test
 
-@router.delete("/{test_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{test_id}")
 def delete_test(
     test_id: int,
     current_user: User = Depends(get_faculty_or_admin),
@@ -143,9 +137,4 @@ def delete_test(
     db.delete(test)
     db.commit()
     
-    return None
-
-# More endpoints would be added here for:
-# 1. Question management
-# 2. Test session management (taking tests)
-# 3. Results and reporting
+    return {"detail": "Test deleted successfully"}

@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, validator
 from datetime import datetime
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 from enum import Enum
 
 # Role enum for schema validation
@@ -57,11 +57,80 @@ class Item(ItemBase):
     class Config:
         from_attributes = True
 
-
 # Question type enum for schema validation
 class QuestionType(str, Enum):
     SINGLE = "single"
     MULTIPLE = "multiple"
+
+# Option schemas
+class OptionBase(BaseModel):
+    option_text: str
+    is_correct: bool = False
+
+class OptionCreate(OptionBase):
+    pass
+
+class OptionUpdate(BaseModel):
+    option_text: Optional[str] = None
+    is_correct: Optional[bool] = None
+
+class OptionResponse(OptionBase):
+    id: int
+    
+    class Config:
+        from_attributes = True
+
+# Question schemas
+class QuestionBase(BaseModel):
+    question_text: str
+    question_type: QuestionType = QuestionType.SINGLE
+    subject: Optional[str] = None
+    difficulty_level: Optional[str] = None
+    tags: Optional[str] = None
+    explanation: Optional[str] = None
+    is_public: bool = False
+
+class QuestionCreate(QuestionBase):
+    options: List[OptionCreate]
+    
+    @validator('options')
+    def validate_options(cls, v, values):
+        # Ensure there are at least 2 options
+        if len(v) < 2:
+            raise ValueError("At least 2 options are required")
+        
+        # For single choice questions, ensure exactly one is correct
+        if values.get('question_type') == QuestionType.SINGLE:
+            correct_count = sum(1 for option in v if option.is_correct)
+            if correct_count != 1:
+                raise ValueError("Single choice questions must have exactly one correct answer")
+        
+        # For multiple choice questions, ensure at least one is correct
+        elif values.get('question_type') == QuestionType.MULTIPLE:
+            correct_count = sum(1 for option in v if option.is_correct)
+            if correct_count < 1:
+                raise ValueError("Multiple choice questions must have at least one correct answer")
+        
+        return v
+
+class QuestionUpdate(BaseModel):
+    question_text: Optional[str] = None
+    question_type: Optional[QuestionType] = None
+    subject: Optional[str] = None
+    difficulty_level: Optional[str] = None
+    tags: Optional[str] = None
+    explanation: Optional[str] = None
+    is_public: Optional[bool] = None
+
+class QuestionResponse(QuestionBase):
+    id: int
+    created_by: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    options: List[OptionResponse]
+    
+    class Config:
+        from_attributes = True
 
 # Test schemas
 class TestBase(BaseModel):
@@ -80,6 +149,24 @@ class TestUpdate(BaseModel):
     duration_minutes: Optional[int] = Field(None, gt=0)
     is_active: Optional[bool] = None
 
+class TestQuestionAdd(BaseModel):
+    question_id: int
+    marks: float = 1.0
+    question_order: Optional[int] = None
+
+class TestQuestionUpdate(BaseModel):
+    marks: Optional[float] = None
+    question_order: Optional[int] = None
+
+class TestQuestionResponse(BaseModel):
+    question_id: int
+    marks: float
+    question_order: int
+    question: QuestionResponse
+    
+    class Config:
+        from_attributes = True
+
 class TestResponse(TestBase):
     id: int
     is_active: bool
@@ -91,43 +178,36 @@ class TestResponse(TestBase):
     class Config:
         from_attributes = True
 
-# Question schemas
-class OptionBase(BaseModel):
-    option_text: str
-    is_correct: bool = False
-
-class OptionCreate(OptionBase):
-    pass
-
-class OptionResponse(OptionBase):
-    id: int
-    
-    class Config:
-        from_attributes = True
-
-class QuestionBase(BaseModel):
-    question_text: str
-    question_type: QuestionType = QuestionType.SINGLE
-    marks: float = 1.0
-
-class QuestionCreate(QuestionBase):
-    options: List[OptionCreate]
-
-class QuestionUpdate(BaseModel):
-    question_text: Optional[str] = None
-    question_type: Optional[QuestionType] = None
-    marks: Optional[float] = None
-
-class QuestionResponse(QuestionBase):
-    id: int
-    test_id: int
-    options: List[OptionResponse]
-    created_at: datetime
+class TestDetailResponse(TestResponse):
+    questions: List[TestQuestionResponse] = []
     
     class Config:
         from_attributes = True
 
 # Test session schemas
+class TestSessionBase(BaseModel):
+    test_id: int
+
+class TestSessionCreate(TestSessionBase):
+    pass
+
+class OptionOrderResponse(BaseModel):
+    question_id: int
+    option_id: int
+    display_order: int
+    
+    class Config:
+        from_attributes = True
+
+class TestSessionWithOptions(TestSessionBase):
+    id: int
+    user_id: int
+    started_at: datetime
+    option_orders: List[OptionOrderResponse]
+    
+    class Config:
+        from_attributes = True
+
 class UserResponseCreate(BaseModel):
     question_id: int
     selected_option_id: int
@@ -140,12 +220,6 @@ class UserResponseResponse(BaseModel):
     
     class Config:
         from_attributes = True
-
-class TestSessionBase(BaseModel):
-    test_id: int
-
-class TestSessionCreate(TestSessionBase):
-    pass
 
 class TestSessionUpdate(BaseModel):
     completed_at: Optional[datetime] = None

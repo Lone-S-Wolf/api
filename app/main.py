@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import items, auth, admin, institution, faculty, student, test
+from app.routers import items, auth, admin, institution, faculty, student, test, test_questions, test_sessions, questions
 from app.models import models
 from app.database.database import engine
 import sqlalchemy.exc
@@ -18,6 +18,8 @@ app = FastAPI(
 
 # Try to create tables, but handle potential database connection errors
 try:
+    # Drop all tables and recreate them
+    # models.Base.metadata.drop_all(bind=engine)
     models.Base.metadata.create_all(bind=engine)
     print("Database tables created successfully")
 except sqlalchemy.exc.OperationalError:
@@ -31,7 +33,13 @@ app.include_router(admin.router)
 app.include_router(institution.router)
 app.include_router(faculty.router)
 app.include_router(student.router)
+
+# Questions
+app.include_router(questions.router)
 app.include_router(test.router)
+app.include_router(test_sessions.router)
+app.include_router(test_questions.router)
+
 
 @app.get("/")
 def read_root():
