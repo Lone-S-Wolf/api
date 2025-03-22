@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import items, auth, admin, institution, faculty, student
+from app.routers import items, auth, admin, institution, faculty, student, test
 from app.models import models
 from app.database.database import engine
 import sqlalchemy.exc
@@ -31,6 +31,7 @@ app.include_router(admin.router)
 app.include_router(institution.router)
 app.include_router(faculty.router)
 app.include_router(student.router)
+app.include_router(test.router)
 
 @app.get("/")
 def read_root():
