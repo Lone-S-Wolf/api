@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
 from typing import Optional, List, Union, Dict
 from enum import Enum
@@ -93,7 +93,7 @@ class QuestionBase(BaseModel):
 class QuestionCreate(QuestionBase):
     options: List[OptionCreate]
     
-    @validator('options')
+    @field_validator('options')
     def validate_options(cls, v, values):
         # Ensure there are at least 2 options
         if len(v) < 2:

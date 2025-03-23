@@ -1,5 +1,3 @@
-# app/routers/questions.py
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -60,12 +58,14 @@ def get_questions(
     # Base query
     query = db.query(Question)
     
-    # Handle permissions - faculty can see their own questions and public questions
+    # Handle permissions:
+    # - Admin can see all questions
+    # - Faculty can see only their own questions AND public questions from other faculty
     if current_user.role == UserRole.FACULTY:
         query = query.filter(
             or_(
-                Question.created_by == current_user.id,
-                Question.is_public == True
+                Question.created_by == current_user.id,  # Their own questions (public or private)
+                Question.is_public == True  # Public questions from anyone
             )
         )
     
@@ -98,7 +98,9 @@ def get_question(
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
     
-    # Check permissions
+    # Check permissions:
+    # - Admin can access any question
+    # - Faculty can access their own questions or public questions
     if current_user.role == UserRole.FACULTY and not question.is_public and question.created_by != current_user.id:
         raise HTTPException(status_code=403, detail="You don't have permission to view this question")
     
@@ -128,7 +130,7 @@ def update_question(
     db.refresh(question)
     return question
 
-@router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{question_id}", status_code=status.HTTP_200_OK)
 def delete_question(
     question_id: int,
     current_user: User = Depends(get_faculty_or_admin),
@@ -146,7 +148,7 @@ def delete_question(
     db.delete(question)  # This should cascade to options
     db.commit()
     
-    return None
+    return {"status": "success", "message": "Question deleted successfully"}
 
 @router.post("/{question_id}/options", status_code=status.HTTP_201_CREATED)
 def add_option(
@@ -203,7 +205,7 @@ def update_option(
     
     return {"status": "success", "message": "Option updated successfully"}
 
-@router.delete("/{question_id}/options/{option_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{question_id}/options/{option_id}", status_code=status.HTTP_200_OK)
 def delete_option(
     question_id: int,
     option_id: int,
@@ -234,4 +236,4 @@ def delete_option(
     db.delete(option)
     db.commit()
     
-    return None
+    return {"status": "success", "message": "Option deleted successfully"}
