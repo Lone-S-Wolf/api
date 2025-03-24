@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from app.routers import items, auth, admin, institution, faculty, student, test, test_questions, test_sessions, questions
-from app.models import models
+from app.routers import auth, admin, institution, faculty, student, test, test_questions, test_sessions, questions
+from app.models import Base  # Updated import for Base
 from app.database.database import engine
 import sqlalchemy.exc
 import os
@@ -19,8 +19,8 @@ app = FastAPI(
 # Try to create tables, but handle potential database connection errors
 try:
     # Drop all tables and recreate them
-    # models.Base.metadata.drop_all(bind=engine)
-    models.Base.metadata.create_all(bind=engine)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     print("Database tables created successfully")
 except sqlalchemy.exc.OperationalError:
     print("Could not connect to the database. Please check your connection settings.")
@@ -28,7 +28,6 @@ except sqlalchemy.exc.OperationalError:
 
 # Include routers
 app.include_router(auth.router)
-app.include_router(items.router)
 app.include_router(admin.router)
 app.include_router(institution.router)
 app.include_router(faculty.router)

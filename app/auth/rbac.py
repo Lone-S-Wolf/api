@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from app.models.models import User, UserRole
+from app.models.user import User, UserRole
 from app.auth.utils import get_current_active_user
 
 def check_user_role(required_roles: list[UserRole], user: User):

@@ -9,7 +9,7 @@ import os
 from dotenv import load_dotenv
 
 from app.schemas.schemas import TokenData
-from app.models.models import User
+from app.models.user import User
 from app.database.database import get_db
 
 # Load environment variables

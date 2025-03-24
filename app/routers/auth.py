@@ -8,7 +8,7 @@ from app.auth.utils import (
     ACCESS_TOKEN_EXPIRE_MINUTES, get_current_active_user
 )
 from app.database.database import get_db
-from app.models.models import User, UserRole
+from app.models.user import User, UserRole
 from app.schemas.schemas import Token, UserCreate, UserResponse
 
 router = APIRouter(

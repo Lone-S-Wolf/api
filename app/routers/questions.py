@@ -4,7 +4,8 @@ from typing import List, Optional
 from sqlalchemy import func, or_
 
 from app.database.database import get_db
-from app.models.models import User, Question, Option, UserRole
+from app.models.user import User, UserRole
+from app.models.question import Question, Option
 from app.schemas.schemas import QuestionCreate, QuestionResponse, QuestionUpdate, OptionCreate, OptionUpdate
 from app.auth.rbac import get_user_with_roles
 

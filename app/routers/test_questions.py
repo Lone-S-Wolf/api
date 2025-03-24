@@ -6,7 +6,9 @@ from typing import List
 from sqlalchemy import select, insert, update, delete
 
 from app.database.database import get_db
-from app.models.models import User, Test, Question, UserRole, test_questions
+from app.models.user import User, UserRole
+from app.models.test import Test, test_questions
+from app.models.question import Question
 from app.schemas.schemas import TestQuestionAdd, TestQuestionUpdate, TestQuestionResponse, QuestionResponse
 from app.auth.rbac import get_user_with_roles
 

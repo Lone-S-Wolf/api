@@ -6,7 +6,8 @@ from typing import List
 from datetime import datetime
 
 from app.database.database import get_db
-from app.models.models import User, Test, UserRole
+from app.models.user import User, UserRole
+from app.models.test import Test
 from app.schemas.schemas import (
     TestCreate, TestUpdate, TestResponse
 )

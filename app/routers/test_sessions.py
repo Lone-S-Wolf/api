@@ -7,7 +7,10 @@ from datetime import datetime
 import random
 
 from app.database.database import get_db
-from app.models.models import User, Test, Question, Option, TestSession, UserResponse, OptionOrder, UserRole, test_questions
+from app.models.user import User, UserRole
+from app.models.test import Test, test_questions
+from app.models.question import Question, Option
+from app.models.session import TestSession, UserResponse, OptionOrder
 from app.schemas.schemas import (
     TestSessionCreate, TestSessionResponse, TestSessionDetailResponse,
     UserResponseCreate, TestSubmission, TestResultsSummary, TestSessionWithOptions

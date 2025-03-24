@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database.database import get_db
-from app.models.models import User, UserRole, Item as ModelItem
+from app.models.user import User, UserRole
 from app.schemas.schemas import UserResponse, Item
 from app.auth.rbac import get_admin_user
 
@@ -80,28 +80,3 @@ def set_user_role(
     db.commit()
     db.refresh(user)
     return user
-
-@router.delete("/items/all", status_code=status.HTTP_204_NO_CONTENT)
-def delete_all_items(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_admin_user)
-):
-    """Delete all items - Admin only"""
-    db.query(ModelItem).delete()
-    db.commit()
-    return None
-
-@router.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_item(
-    item_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_admin_user)
-):
-    """Delete a specific item - Admin only"""
-    db_item = db.query(ModelItem).filter(ModelItem.id == item_id).first()
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    
-    db.delete(db_item)
-    db.commit()
-    return None 
