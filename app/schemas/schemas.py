@@ -94,19 +94,22 @@ class QuestionCreate(QuestionBase):
     options: List[OptionCreate]
     
     @field_validator('options')
-    def validate_options(cls, v, values):
-        # Ensure there are at least 2 options
-        if len(v) < 2:
-            raise ValueError("At least 2 options are required")
+    def validate_options(cls, v, info):
+        # Ensure there are at least 4 options
+        if len(v) < 4:
+            raise ValueError("At least 4 options are required")
+        
+        # Access question_type from info.data instead of values.get()
+        question_type = info.data.get('question_type')
         
         # For single choice questions, ensure exactly one is correct
-        if values.get('question_type') == QuestionType.SINGLE:
+        if question_type == QuestionType.SINGLE:
             correct_count = sum(1 for option in v if option.is_correct)
             if correct_count != 1:
                 raise ValueError("Single choice questions must have exactly one correct answer")
         
         # For multiple choice questions, ensure at least one is correct
-        elif values.get('question_type') == QuestionType.MULTIPLE:
+        elif question_type == QuestionType.MULTIPLE:
             correct_count = sum(1 for option in v if option.is_correct)
             if correct_count < 1:
                 raise ValueError("Multiple choice questions must have at least one correct answer")
