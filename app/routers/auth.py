@@ -9,7 +9,7 @@ from app.auth.utils import (
 )
 from app.database.database import get_db
 from app.models.user import User, UserRole
-from app.schemas.schemas import Token, UserCreate, UserResponse
+from app.schemas.user.user_schemas import Token, UserCreate, UserResponse
 
 router = APIRouter(
     prefix="/auth",

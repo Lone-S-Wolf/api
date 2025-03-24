@@ -4,7 +4,7 @@ from typing import List
 
 from app.database.database import get_db
 from app.models.user import User, UserRole
-from app.schemas.schemas import UserResponse, Item
+from app.schemas.user.user_schemas import UserResponse
 from app.auth.rbac import get_admin_user
 
 router = APIRouter(

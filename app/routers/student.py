@@ -4,7 +4,6 @@ from typing import List
 
 from app.database.database import get_db
 from app.models.user import User, UserRole
-from app.schemas.schemas import Item
 from app.auth.rbac import get_user_with_roles
 
 # All authenticated users can access student endpoints

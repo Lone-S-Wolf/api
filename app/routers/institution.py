@@ -4,7 +4,7 @@ from typing import List
 
 from app.database.database import get_db
 from app.models.user import User, UserRole
-from app.schemas.schemas import UserResponse
+from app.schemas.user.user_schemas import UserResponse
 from app.auth.rbac import get_user_with_roles
 
 # Only institutions and admins can access these endpoints

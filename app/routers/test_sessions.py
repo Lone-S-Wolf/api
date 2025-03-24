@@ -11,7 +11,7 @@ from app.models.user import User, UserRole
 from app.models.test import Test, test_questions
 from app.models.question import Question, Option
 from app.models.session import TestSession, UserResponse, OptionOrder
-from app.schemas.schemas import (
+from app.schemas.session.session_schemas import (
     TestSessionCreate, TestSessionResponse, TestSessionDetailResponse,
     UserResponseCreate, TestSubmission, TestResultsSummary, TestSessionWithOptions
 )

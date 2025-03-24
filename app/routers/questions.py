@@ -6,7 +6,8 @@ from sqlalchemy import func, or_
 from app.database.database import get_db
 from app.models.user import User, UserRole
 from app.models.question import Question, Option
-from app.schemas.schemas import QuestionCreate, QuestionResponse, QuestionUpdate, OptionCreate, OptionUpdate
+from app.schemas.question.question_schemas import QuestionCreate, QuestionResponse, QuestionUpdate
+from app.schemas.question.option_schemas import OptionUpdate, OptionCreate
 from app.auth.rbac import get_user_with_roles
 
 router = APIRouter(

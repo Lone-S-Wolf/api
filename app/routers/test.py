@@ -8,7 +8,7 @@ from datetime import datetime
 from app.database.database import get_db
 from app.models.user import User, UserRole
 from app.models.test import Test
-from app.schemas.schemas import (
+from app.schemas.test.test_schemas import (
     TestCreate, TestUpdate, TestResponse
 )
 from app.auth.rbac import get_user_with_roles

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
 
-from app.schemas.schemas import TokenData
+from app.schemas.user.user_schemas import TokenData
 from app.models.user import User
 from app.database.database import get_db
 
