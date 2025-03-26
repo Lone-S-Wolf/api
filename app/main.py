@@ -19,7 +19,7 @@ app = FastAPI(
 # Try to create tables, but handle potential database connection errors
 try:
     # Drop all tables and recreate them
-    Base.metadata.drop_all(bind=engine)
+    # Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     print("Database tables created successfully")
 except sqlalchemy.exc.OperationalError:
