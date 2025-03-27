@@ -16,6 +16,7 @@ from app.schemas.session.session_schemas import (
     UserResponseCreate, TestSubmission, TestResultsSummary, TestSessionWithOptions
 )
 from app.auth.rbac import get_user_with_roles
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(
     prefix="/test-sessions",
@@ -261,3 +262,130 @@ def get_test_results(
     )
     
     return result_summary
+
+
+@router.post("/{session_id}/save-response", status_code=status.HTTP_201_CREATED)
+def save_single_response(
+    session_id: int,
+    response: UserResponseCreate,
+    current_user: User = Depends(get_student_or_above),
+    db: Session = Depends(get_db)
+):
+    """
+    Save a single question response during an ongoing test session.
+    
+    - Validates the test session exists
+    - Ensures the user owns the session
+    - Checks the test is still active
+    - Prevents multiple responses for the same question in a session
+    """
+    # Get the test session
+    session = db.query(TestSession).filter(TestSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Test session not found")
+    
+    # Check if this is the user's session
+    if session.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only save responses for your own test session")
+    
+    # Check if session is already completed
+    if session.completed_at:
+        raise HTTPException(status_code=400, detail="Test session is already completed")
+    
+    # Get the test to verify question belongs to this test
+    test = db.query(Test).filter(Test.id == session.test_id).first()
+    
+    # Verify the question belongs to this test
+    test_question = db.query(test_questions).filter(
+        test_questions.c.test_id == test.id,
+        test_questions.c.question_id == response.question_id
+    ).first()
+    
+    if not test_question:
+        raise HTTPException(status_code=400, detail="Question does not belong to this test")
+    
+    # Check if the option belongs to the question
+    option = db.query(Option).filter(
+        Option.id == response.selected_option_id,
+        Option.question_id == response.question_id
+    ).first()
+    
+    if not option:
+        raise HTTPException(status_code=400, detail="Invalid option for the question")
+    
+    try:
+        # Check if a response for this question already exists
+        existing_response = db.query(UserResponse).filter(
+            UserResponse.test_session_id == session.id,
+            UserResponse.question_id == response.question_id
+        ).first()
+        
+        if existing_response:
+            # Update existing response
+            existing_response.selected_option_id = response.selected_option_id
+        else:
+            # Create new response
+            new_response = UserResponse(
+                test_session_id=session.id,
+                question_id=response.question_id,
+                selected_option_id=response.selected_option_id
+            )
+            db.add(new_response)
+        
+        # Commit the changes
+        db.commit()
+        
+        return {
+            "status": "success", 
+            "message": "Response saved successfully",
+            "question_id": response.question_id
+        }
+    
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Error saving response")
+
+@router.get("/{session_id}/saved-responses")
+def get_saved_responses(
+    session_id: int,
+    current_user: User = Depends(get_student_or_above),
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve all saved responses for a specific test session.
+    
+    - Validates the test session exists
+    - Ensures the user owns the session
+    - Returns list of saved responses
+    """
+    # Get the test session
+    session = db.query(TestSession).filter(TestSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Test session not found")
+    
+    # Check if this is the user's session
+    if session.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only view responses for your own test session")
+    
+    # Check if session is already completed
+    if session.completed_at:
+        raise HTTPException(status_code=400, detail="Test session is already completed")
+    
+    # Retrieve saved responses
+    saved_responses = db.query(UserResponse).filter(
+        UserResponse.test_session_id == session.id
+    ).all()
+    
+    # Transform to response schema
+    response_list = [
+        {
+            "question_id": response.question_id,
+            "selected_option_id": response.selected_option_id,
+            "created_at": response.created_at
+        } for response in saved_responses
+    ]
+    
+    return {
+        "total_saved_responses": len(response_list),
+        "responses": response_list
+    }

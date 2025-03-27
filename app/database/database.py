@@ -1,7 +1,11 @@
+# app/database/database.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 from dotenv import load_dotenv
+
+# Import custom serializers
+from app.utils.time_utils import json_serializer, json_deserializer
 
 # Load environment variables
 load_dotenv()
@@ -12,12 +16,24 @@ SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 # Create database engine based on URL
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
-        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+        SQLALCHEMY_DATABASE_URL, 
+        connect_args={"check_same_thread": False},
+        json_serializer=json_serializer,
+        json_deserializer=json_deserializer
     )
 else:
-    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        json_serializer=json_serializer,
+        json_deserializer=json_deserializer
+    )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Create SessionLocal without timezone parameter
+SessionLocal = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=engine
+)
 
 Base = declarative_base()
 
@@ -27,4 +43,4 @@ def get_db():
     try:
         yield db
     finally:
-        db.close() 
+        db.close()

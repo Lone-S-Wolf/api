@@ -1,4 +1,5 @@
-from datetime import timedelta
+# app/routers/auth.py
+from datetime import timedelta, datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -52,8 +53,8 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     # Create new user
     hashed_password = get_password_hash(user.password)
     
-    # Get role from request, default to regular user
-    role = user.role if user.role else UserRole.USER
+    # Get role from request, default to faculty
+    role = user.role if user.role else UserRole.FACULTY
     
     # For security, check if this is the first user in the system
     # If yes, make them an admin automatically
@@ -61,11 +62,13 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     if user_count == 0:
         role = UserRole.ADMIN
     
+    # Create user with explicit UTC timestamp
     db_user = User(
         email=user.email,
         username=user.username,
         hashed_password=hashed_password,
-        role=role
+        role=role,
+        created_at=datetime.now(timezone.utc)  # Explicitly set UTC timestamp
     )
     db.add(db_user)
     db.commit()
@@ -74,4 +77,4 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.get("/users/me", response_model=UserResponse)
 def read_users_me(current_user: User = Depends(get_current_active_user)):
-    return current_user 
+    return current_user
